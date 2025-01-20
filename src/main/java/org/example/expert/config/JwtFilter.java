@@ -22,7 +22,7 @@ public class JwtFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        Filter.super.init(filterConfig);
+        Filter.super.init(filterConfig);//빈을 만들어주는 클래스를 설정한다
     }
 
     @Override
@@ -30,14 +30,14 @@ public class JwtFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String url = httpRequest.getRequestURI();
+        String url = httpRequest.getRequestURI();//사용자가 접근하고자하는 url을 뽑아낸다
 
-        if (url.startsWith("/auth")) {
+        if (url.startsWith("/auth")) {//회원가입 또는 로그인을 하고자한다면 바로 돌아간다
             chain.doFilter(request, response);
             return;
         }
 
-        String bearerJwt = httpRequest.getHeader("Authorization");
+        String bearerJwt = httpRequest.getHeader("Authorization");//토큰값을 뽑아낸다
 
         if (bearerJwt == null) {
             // 토큰이 없는 경우 400을 반환합니다.
@@ -49,7 +49,7 @@ public class JwtFilter implements Filter {
 
         try {
             // JWT 유효성 검사와 claims 추출
-            Claims claims = jwtUtil.extractClaims(jwt);
+            Claims claims = jwtUtil.extractClaims(jwt);//페이로드에 해당하는 부분을 추출한다
             if (claims == null) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
                 return;
@@ -59,6 +59,7 @@ public class JwtFilter implements Filter {
 
             httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
             httpRequest.setAttribute("email", claims.get("email"));
+            httpRequest.setAttribute("nickName", claims.get("nickName"));
             httpRequest.setAttribute("userRole", claims.get("userRole"));
 
             if (url.startsWith("/admin")) {

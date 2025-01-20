@@ -16,7 +16,7 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        boolean hasAuthAnnotation = parameter.getParameterAnnotation(Auth.class) != null;
+        boolean hasAuthAnnotation = parameter.getParameterAnnotation(Auth.class) != null;//파라미터의 어노테이션을 가져와서 auth인지 아닌지
         boolean isAuthUserType = parameter.getParameterType().equals(AuthUser.class);
 
         // @Auth 어노테이션과 AuthUser 타입이 함께 사용되지 않은 경우 예외 발생
@@ -39,8 +39,9 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         // JwtFilter 에서 set 한 userId, email, userRole 값을 가져옴
         Long userId = (Long) request.getAttribute("userId");
         String email = (String) request.getAttribute("email");
+        String nickName = (String) request.getAttribute("nickName");
         UserRole userRole = UserRole.of((String) request.getAttribute("userRole"));
 
-        return new AuthUser(userId, email, userRole);
+        return new AuthUser(userId, email, nickName, userRole);
     }
 }
