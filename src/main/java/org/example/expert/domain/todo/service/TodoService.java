@@ -1,6 +1,7 @@
 package org.example.expert.domain.todo.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.expert.client.WeatherClient;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
@@ -17,7 +18,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.DateFormatter;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TodoService {
@@ -63,6 +73,41 @@ public class TodoService {
                 todo.getModifiedAt()
         ));
     }
+
+
+    public Page<TodoResponse> searchTodos(int page, int size, String weather,
+                                          String startDate, String endDate
+    ){
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        LocalDateTime sDate = null;
+        LocalDateTime eDate = null;
+
+
+
+        if(startDate != null){
+            sDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+        }
+
+        if(endDate != null){
+            eDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE).atTime(LocalTime.MAX);
+        }
+
+        log.info("시작날짜: "+sDate.toString());
+
+        Page<Todo> todos = todoRepository.searchTodos(pageable, weather, sDate, eDate);
+        return todos.map(todo -> new TodoResponse(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getContents(),
+                todo.getWeather(),
+                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail(), todo.getUser().getNickName()),
+                todo.getCreatedAt(),
+                todo.getModifiedAt()
+        ));
+
+    }
+
 
     public TodoResponse getTodo(long todoId) {
         Todo todo = todoRepository.findByIdWithUser(todoId)
