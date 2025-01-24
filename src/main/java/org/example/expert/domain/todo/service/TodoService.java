@@ -83,8 +83,6 @@ public class TodoService {
         LocalDateTime sDate = null;
         LocalDateTime eDate = null;
 
-
-
         if(startDate != null){
             sDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
         }
@@ -92,8 +90,6 @@ public class TodoService {
         if(endDate != null){
             eDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE).atTime(LocalTime.MAX);
         }
-
-        log.info("시작날짜: "+sDate.toString());
 
         Page<Todo> todos = todoRepository.searchTodos(pageable, weather, sDate, eDate);
         return todos.map(todo -> new TodoResponse(
