@@ -28,6 +28,8 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
                            @Param("endDate") LocalDateTime endDate);
 
 
+
+
     @Query("SELECT t FROM Todo t " +
             "LEFT JOIN t.user " +
             "WHERE t.id = :todoId")
