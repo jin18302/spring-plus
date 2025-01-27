@@ -12,10 +12,15 @@ public class FilterConfig {
     private final JwtUtil jwtUtil;
 
     @Bean
-    public FilterRegistrationBean<JwtFilter> jwtFilter() {
+    public JwtFilter jwtFilter() {
+        return new JwtFilter(jwtUtil); // JwtFilter Bean 등록
+    }
+
+    @Bean
+    public FilterRegistrationBean<JwtFilter> filterRegistrationBean(JwtFilter jwtFilter) {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new JwtFilter(jwtUtil));
-        registrationBean.addUrlPatterns("/*"); // 필터를 적용할 URL 패턴을 지정합니다.
+        registrationBean.setFilter(jwtFilter); // 주입된 Bean 사용
+        registrationBean.addUrlPatterns("/*");
 
         return registrationBean;
     }

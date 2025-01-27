@@ -10,9 +10,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.user.enums.UserRole;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,12 +36,6 @@ public class JwtFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String url = httpRequest.getRequestURI();//사용자가 접근하고자하는 url을 뽑아낸다
-
-        if (url.startsWith("/auth")) {//회원가입 또는 로그인을 하고자한다면 바로 돌아간다
-            chain.doFilter(request, response);
-            return;
-        }
 
         String bearerJwt = httpRequest.getHeader("Authorization");//토큰값을 뽑아낸다
 
@@ -55,24 +55,24 @@ public class JwtFilter implements Filter {
                 return;
             }
 
+
+            Long authId = (Long)claims.get("id");
+            String email = claims.get("email", String.class);
+            String userNickname = claims.get("nickName", String.class);
             UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class));
 
-            httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
-            httpRequest.setAttribute("email", claims.get("email"));
-            httpRequest.setAttribute("nickName", claims.get("nickName"));
-            httpRequest.setAttribute("userRole", claims.get("userRole"));
+            UserDetails user= new AuthUser(authId, email, userNickname, userRole);
 
-            if (url.startsWith("/admin")) {
-                // 관리자 권한이 없는 경우 403을 반환합니다.
-                if (!UserRole.ADMIN.equals(userRole)) {
-                    httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "관리자 권한이 없습니다.");
-                    return;
-                }
-                chain.doFilter(request, response);
-                return;
-            }
+
+
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+            );
+
 
             chain.doFilter(request, response);
+
+
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");

@@ -1,11 +1,22 @@
 package org.example.expert.domain.user.enums;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 
 import java.util.Arrays;
 
+@Getter
 public enum UserRole {
-    ADMIN, USER;
+    ADMIN("ROLE_ADMIN"), USER("ROLE_USER");
+
+
+    private final String userRole;
+
+    UserRole(String userRole) {
+        this.userRole = userRole;
+    }
+
 
     public static UserRole of(String role) {
         return Arrays.stream(UserRole.values())
