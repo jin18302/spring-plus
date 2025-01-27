@@ -32,7 +32,7 @@ status를 예외가 던지는 상태인 isBadRequest로 변경</br>
  IS NULL, || 연산자 이용해 조건이 null일 경우 조건을 통과할수 있도록 동적인 jpql쿼리 작성</br>
 </br>
 </br>
-# 2-1</br>
+# ✅2-1</br>
 ## JPA Cascade
  casecade이용해 부모 Entity 저장시 연관된 자식 Entity도 자동으로 영속상태로 만들도록 설정</br>
  </br>
